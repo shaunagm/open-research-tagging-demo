@@ -82,9 +82,9 @@ Optional workflows:
 
 - [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) — publishes `site/` to GitHub Pages on push to `main` (and manual dispatch)
 - [`.github/workflows/check-comment-tags.yml`](.github/workflows/check-comment-tags.yml) — replies when a review comment has malformed tags; fails a PR check if any bad tags remain
-- [`.github/workflows/update-comments.yml`](.github/workflows/update-comments.yml) — refreshes `site/data/` **daily** (14:00 UTC) and on **manual** “Run workflow” (push then triggers Pages deploy)
+- [`.github/workflows/update-comments.yml`](.github/workflows/update-comments.yml) — refreshes `site/data/` **daily** (14:00 UTC) and on **manual** “Run workflow”, then **deploys Pages** in the same run
 
-For a live demo right after tagging, use Actions → Update comment data → Run workflow (or the local commands above).
+For a live demo right after tagging, use Actions → Update comment data → Run workflow (or the local commands above). That one action fetches comments and publishes the site — you do not need to run Deploy Pages separately.
 
 ### Enable GitHub Pages (one-time)
 

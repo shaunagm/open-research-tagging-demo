@@ -1,6 +1,8 @@
-# Fetch PR review comments and refresh site/data JSON.
-# Runs daily and on manual dispatch. Pair with GitHub Pages serving /site
-# from main so the published site updates after this workflow commits.
+# Fetch PR review comments, refresh site/data JSON, commit, and deploy Pages.
+# Runs daily and on manual dispatch.
+#
+# Note: pushes made with GITHUB_TOKEN do not trigger other workflows, so this
+# workflow deploys Pages itself after refreshing data.
 
 name: Update comment data
 
@@ -16,10 +18,15 @@ concurrency:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  refresh:
+  refresh-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,3 +56,16 @@ jobs:
           git add site/data/comments.json site/data/projects.json
           git diff --staged --quiet || git commit -m "chore: refresh PR review comment data"
           git push
+
+      # Deploy from this job (GITHUB_TOKEN pushes do not start deploy-pages.yml)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site/ artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
