@@ -1,22 +1,37 @@
 # How to tag on a pull request
 
-Use **PR review comments** on the Files tab (line or multi-line comments). Tags are hashtags in the comment body so the fetch script can parse them. Free-text notes after the tags are encouraged.
+Use **PR review comments** on the Files tab (line or multi-line). Put codebook tags on their own lines at the top of the comment, then a short free-text note.
 
-Codebook: [codebook.yaml](codebook.yaml) (draft — not final).
+Full codebook: [codebook.yaml](codebook.yaml) (draft — not final).
 
-## Comment shape
+## Copy-paste starter
 
 ```text
 #stance/permissive-with-conditions
-#scope/code:restricted
-#rationale/maintainer-and-reviewer-burden
-#guidance-level/substantive-guidance
-#guidance/evaluation
 #disclosure/required
-#human-responsibility/yes
 
-Authors must disclose AI use; reviewers are not first-line QA for generated code.
+One or two sentences on what this passage shows.
 ```
+
+More starters below. After you comment, someone runs `scripts/fetch_pr_comments.py` so tags show up on the site.
+
+A GitHub Action watches review comments: if a tag looks malformed (e.g. `#Disclosure` with no `/value`), the bot replies on that comment. The same check runs on the PR as a status check before merge.
+
+## Rules (short)
+
+1. **Lowercase** hashtags.
+2. Always **`#namespace/value`** — a slash is required.
+3. **Scope** is special: `#scope/<type>:<position>` (colon between type and position).
+4. Unknown values still show on the site (codebook is draft); bare `#Disclosure` with no `/value` will **not** parse.
+
+## Common mistakes
+
+| Don’t write | Write instead |
+|-------------|----------------|
+| `#Disclosure` | `#disclosure/required` |
+| `#stance` or `#stance permissive` | `#stance/permissive-with-conditions` |
+| `#scope/code` | `#scope/code:restricted` |
+| Conversation comment on the PR | Review comment on the **Files** tab (needs a line) |
 
 ## Tag reference
 
@@ -26,25 +41,31 @@ Authors must disclose AI use; reviewers are not first-line QA for generated code
 | Scope | `#scope/<type>:<position>` | `#scope/docs-and-text:allowed` |
 | Rationale | `#rationale/<id>` | `#rationale/code-quality` |
 | Guidance level | `#guidance-level/<id>` | `#guidance-level/some-guidance` |
-| Guidance type | `#guidance/<id>` | `#guidance/scoping` |
+| Guidance type | `#guidance/<id>` | `#guidance/evaluation` |
 | Disclosure | `#disclosure/<id>` | `#disclosure/required` |
 | Human responsibility | `#human-responsibility/<id>` | `#human-responsibility/yes` |
 | Enforcement | `#enforcement/<id>` | `#enforcement/contributor-blocked` |
 
-Scope positions: `allowed`, `restricted`, `banned`, `not_addressed`.
+**Stance ids:** `ban`, `discouraged`, `gate-restrict`, `permissive-with-conditions`, `permissive`, `no-policy`
 
-Unknown tags still appear in the site table — fine while the codebook is in draft.
+**Disclosure ids:** `none`, `recommended`, `required`
+
+**Scope types:** `code`, `tests`, `docs-and-text`, `issues-and-pr-descriptions`, `review`, `autonomous-agents`, `contribution-types-not-defined`
+
+**Scope positions:** `allowed`, `restricted`, `banned`, `not_addressed`
+
+**Rationale ids:** `code-quality`, `maintainer-and-reviewer-burden`, `security`, `licensing-and-copyright`, `environmental`, `social-and-ethical`, `contributor-learning-and-skill-development`, `other`
 
 ## Project-level vs passage tags
 
-- **`projects/<slug>/project.yaml`** — overall Stance, Accountability, Context, and other codes for the whole policy.
-- **PR line comments** — evidence on specific passages (Scope, rationale, guidance quotes).
+- **`projects/<slug>/project.yaml`** — overall Stance, Accountability, Context, etc. for the whole policy.
+- **PR line comments** — evidence on specific passages.
 
-## Sample comments for demo prep (pyOpenSci)
+## Sample comments (pyOpenSci)
 
-Leave these on `projects/pyopensci/generative-ai-policy.md` after the first PR is open:
+Leave on `projects/pyopensci/generative-ai-policy.md` (or checklist) while a PR is open:
 
-1. On the disclosure / human-review paragraph:
+1. Disclosure / human-review paragraph:
    ```text
    #stance/permissive-with-conditions
    #disclosure/required
@@ -54,7 +75,7 @@ Leave these on `projects/pyopensci/generative-ai-policy.md` after the first PR i
    Disclosure required; meaningful human review expected before submission.
    ```
 
-2. On “Protect volunteer reviewers” / equitable balance of effort:
+2. Protect volunteer reviewers:
    ```text
    #rationale/maintainer-and-reviewer-burden
    #guidance-level/substantive-guidance
@@ -62,7 +83,7 @@ Leave these on `projects/pyopensci/generative-ai-policy.md` after the first PR i
    Explicit goal: reviewers are not first-line QA for generated code.
    ```
 
-3. On communication in review issues (human-written; block spam accounts):
+3. Communication in review issues:
    ```text
    #scope/issues-and-pr-descriptions:restricted
    #enforcement/contributor-blocked
@@ -70,7 +91,7 @@ Leave these on `projects/pyopensci/generative-ai-policy.md` after the first PR i
    Review communication should be human-written; spam/automated burden can lead to blocks.
    ```
 
-4. On development history timeline (3–6 months public history):
+4. Development history timeline:
    ```text
    #scope/code:restricted
    #guidance/scoping
@@ -80,7 +101,7 @@ Leave these on `projects/pyopensci/generative-ai-policy.md` after the first PR i
    Short-lived / rapid generation timelines face higher scrutiny; iterative public history required.
    ```
 
-5. On package scope & design / situating in the ecosystem:
+5. Package scope & design:
    ```text
    #guidance/design
    #guidance-level/substantive-guidance

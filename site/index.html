@@ -314,6 +314,20 @@
     .coder-note {
       color: var(--ink);
     }
+    .parse-warn {
+      margin: 0.35rem 0 0;
+      padding: 0.3rem 0.45rem;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      color: #7a4b00;
+      background: #f8ebd2;
+      border-left: 3px solid #c48a2a;
+      max-width: 28rem;
+    }
+    .help-link {
+      font-size: 0.85rem;
+      margin: 0 0 1rem;
+    }
     a { color: var(--accent); }
     #commentstable_filter { display: none; }
 
@@ -339,6 +353,11 @@
       <p class="lede">
         PR review comments pooled across every pull request. Use the left panel
         to filter by codebook dimension — sections stay collapsed until you open them.
+      </p>
+      <p class="help-link">
+        Tag format: <code>#namespace/value</code>
+        (e.g. <code>#disclosure/required</code>) —
+        <a href="https://github.com/shaunagm/open-research-tagging-demo/blob/main/codebook/COMMENTING.md">commenting guide</a>
       </p>
       <div id="fixture-banner" class="banner" hidden>
         <strong>Sample data.</strong> Showing fixture comments until you fetch
@@ -451,6 +470,10 @@
           '<div class="excerpt coder-note">' +
           $("<div>").text(excerpt(row.body)).html() +
           "</div>";
+        (row.parse_warnings || []).forEach((w) => {
+          html +=
+            '<div class="parse-warn">' + $("<div>").text(w).html() + "</div>";
+        });
         return html;
       }
 

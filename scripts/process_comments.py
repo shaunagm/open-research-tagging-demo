@@ -24,10 +24,13 @@ DEFAULT_OUT = ROOT / "site" / "data" / "comments.json"
 CODEBOOK_PATH = ROOT / "site" / "data" / "codebook.json"
 
 # #stance/gate-restrict  or  #scope/code:restricted
+# Also accept #disclosure:required (colon instead of slash) as a common slip.
 TAG_RE = re.compile(
-    r"#(?P<ns>[a-z0-9-]+)/(?P<val>[a-z0-9-]+)(?::(?P<qual>[a-z0-9-]+))?",
+    r"#(?P<ns>[a-z0-9-]+)[/:](?P<val>[a-z0-9-]+)(?::(?P<qual>[a-z0-9-]+))?",
     re.IGNORECASE,
 )
+# Any #Word token — used to flag malformed tags like #Disclosure with no /value
+HASH_TOKEN_RE = re.compile(r"#([A-Za-z][\w-]*)")
 
 
 def parse_args() -> argparse.Namespace:
@@ -102,6 +105,31 @@ def parse_tags(body: str, codebook: dict) -> list[dict]:
             raw["qualifier"] = m.group("qual").lower()
         tags.append(enrich_tag(raw, codebook))
     return tags
+
+
+def tag_warnings(body: str, tags: list[dict]) -> list[str]:
+    """Flag hashtags that look intentional but did not parse as codebook tags."""
+    text = body or ""
+    covered = set()
+    for m in TAG_RE.finditer(text):
+        covered.update(range(m.start(), m.end()))
+
+    warnings: list[str] = []
+    for m in HASH_TOKEN_RE.finditer(text):
+        if any(i in covered for i in range(m.start(), m.end())):
+            continue
+        token = m.group(0)
+        warnings.append(
+            f"{token} looks like a tag but needs #namespace/value "
+            f"(e.g. #disclosure/required). See codebook/COMMENTING.md"
+        )
+
+    if not tags and not warnings and text.strip().startswith("#"):
+        warnings.append(
+            "Comment starts with # but no tags parsed. "
+            "Use #namespace/value — see codebook/COMMENTING.md"
+        )
+    return warnings
 
 
 def codes_by_dimension(tags: list[dict]) -> dict:
@@ -266,6 +294,7 @@ def normalize(comment: dict, codebook: dict) -> dict:
     path = comment.get("path")
     user = (comment.get("user") or {}).get("login")
     tags = parse_tags(body, codebook)
+    warnings = tag_warnings(body, tags)
     quoted = resolve_quote(comment)
     return {
         "id": comment.get("id"),
@@ -277,6 +306,7 @@ def normalize(comment: dict, codebook: dict) -> dict:
         "tag_strings": [t["raw"] for t in tags],
         "displays": [t["display"] for t in tags],
         "filter_keys": [t["filter_key"] for t in tags],
+        "parse_warnings": warnings,
         "codes": codes_by_dimension(tags),
         "path": path,
         "project": project_from_path(path),

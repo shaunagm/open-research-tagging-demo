@@ -78,7 +78,20 @@ python3 scripts/process_projects.py   # refresh overall↔comment link counts
 # then re-open site/ (or python3 -m http.server -d site 8000)
 ```
 
-Optional workflow: [`.github/workflows/update-comments.yml`](.github/workflows/update-comments.yml) (manual dispatch).
+Optional workflows:
+
+- [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) — publishes `site/` to GitHub Pages on push to `main` (and manual dispatch)
+- [`.github/workflows/check-comment-tags.yml`](.github/workflows/check-comment-tags.yml) — replies when a review comment has malformed tags; fails a PR check if any bad tags remain
+- [`.github/workflows/update-comments.yml`](.github/workflows/update-comments.yml) — refreshes `site/data/` **daily** (14:00 UTC) and on **manual** “Run workflow” (push then triggers Pages deploy)
+
+For a live demo right after tagging, use Actions → Update comment data → Run workflow (or the local commands above).
+
+### Enable GitHub Pages (one-time)
+
+1. Push this workflow to `main`.
+2. Repo **Settings → Pages → Build and deployment → Source → GitHub Actions** (not “Deploy from a branch”).
+3. Run **Actions → Deploy Pages → Run workflow**, or push any change under `site/`.
+4. Site URL will be `https://<user>.github.io/open-research-tagging-demo/` (see Settings → Pages).
 
 ## Demo prep checklist (do this after first push)
 
@@ -87,11 +100,9 @@ You are here when the repo exists on GitHub and coworkers can open it.
 1. Push this repo and open a PR that adds `projects/pyopensci/` (or keep the import PR open).
 2. Leave the sample review comments from [`codebook/COMMENTING.md`](codebook/COMMENTING.md) on the policy / checklist lines.
 3. Optional: second small PR with 1–2 more comments to show multi-PR merge in the table.
-4. Run fetch + process; commit updated `site/data/comments.json` (and `raw_comments.json` if you track it).
-5. Live beat: add one new tagged comment on a call → re-fetch → filter to that tag.
+4. Run fetch + process (or the Update comment data workflow); commit/push updated `site/data/comments.json` and `projects.json` if you ran locally.
+5. Live beat: add one new tagged comment on a call → run the workflow → filter to that tag.
 
 ## Later
 
-- GitHub Pages from `site/`
-- Scheduled Actions refresh
 - Tighten codebook as the real study design settles
