@@ -1,0 +1,51 @@
+# Copy this folder to projects/<slug>/ and fill in.
+# Project-level codes (Stance, Accountability, Context, etc.).
+# Use PR review comments for passage-level evidence — see codebook/COMMENTING.md.
+
+slug: example-project
+display_name: Example Project
+
+provenance:
+  source_repo: https://github.com/org/repo
+  source_path: path/to/policy.md
+  source_commit: REPLACE_WITH_FULL_SHA
+  source_url: https://github.com/org/repo/blob/REPLACE_WITH_FULL_SHA/path/to/policy.md
+  retrieved_at: YYYY-MM-DD
+  policy_location: standalone-file  # CONTRIBUTING | standalone-file | governance-doc | other
+  policy_date: null  # if known
+  notes: ""
+
+coding:
+  stance: null  # ban | discouraged | gate-restrict | permissive-with-conditions | permissive | no-policy
+
+  scope:
+    code: not_addressed  # allowed | restricted | banned | not_addressed
+    tests: not_addressed
+    docs_and_text: not_addressed
+    issues_and_pr_descriptions: not_addressed
+    review: not_addressed
+    autonomous_agents: not_addressed
+    contribution_types_not_defined: not_addressed
+
+  stated_rationale: []
+  # e.g. [code-quality, maintainer-and-reviewer-burden]
+
+  guidance_on_use:
+    level: null  # restricts-only | some-guidance | substantive-guidance
+    types: []  # scoping | design | evaluation | iteration | learning
+
+  accountability:
+    human_responsibility: not_stated  # yes | no | not_stated
+    disclosure: none  # none | recommended | required
+    disclosure_format: []  # label-or-tag | free-text | other
+    enforcement: []  # none-stated | pr-closed | contributor-blocked | other
+
+  context:
+    project_size: ""  # note measure and thresholds
+    governance: null  # solo | community | foundation-backed | corporate-backed
+    domain: ""
+    notes: ""
+
+files:
+  - path: policy.md
+    description: Primary AI / LLM contribution policy

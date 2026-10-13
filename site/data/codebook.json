@@ -1,0 +1,120 @@
+{
+  "version": "draft-0.1",
+  "namespaces": {
+    "stance": {
+      "dimension": "stance",
+      "label": "Stance",
+      "kind": "value"
+    },
+    "rationale": {
+      "dimension": "stated_rationale",
+      "label": "Stated rationale",
+      "kind": "value"
+    },
+    "guidance-level": {
+      "dimension": "guidance_level",
+      "label": "Guidance level",
+      "kind": "value"
+    },
+    "guidance": {
+      "dimension": "guidance_type",
+      "label": "Guidance type",
+      "kind": "value"
+    },
+    "disclosure": {
+      "dimension": "disclosure",
+      "label": "Disclosure",
+      "kind": "value"
+    },
+    "human-responsibility": {
+      "dimension": "human_responsibility",
+      "label": "Human responsibility",
+      "kind": "value"
+    },
+    "enforcement": {
+      "dimension": "enforcement",
+      "label": "Enforcement",
+      "kind": "value"
+    },
+    "scope": {
+      "dimension": "scope",
+      "label": "Scope",
+      "kind": "scope"
+    }
+  },
+  "values": {
+    "stance": {
+      "ban": "Ban",
+      "discouraged": "Discouraged",
+      "gate-restrict": "Gate/restrict",
+      "permissive-with-conditions": "Permissive with conditions",
+      "permissive": "Permissive",
+      "no-policy": "No policy"
+    },
+    "stated_rationale": {
+      "code-quality": "Code quality",
+      "maintainer-and-reviewer-burden": "Maintainer and reviewer burden",
+      "security": "Security",
+      "licensing-and-copyright": "Licensing and copyright",
+      "environmental": "Environmental",
+      "social-and-ethical": "Social and ethical",
+      "contributor-learning-and-skill-development": "Contributor learning and skill development",
+      "other": "Other"
+    },
+    "guidance_level": {
+      "restricts-only": "Restricts only",
+      "some-guidance": "Some guidance",
+      "substantive-guidance": "Substantive guidance"
+    },
+    "guidance_type": {
+      "scoping": "Scoping",
+      "design": "Design",
+      "evaluation": "Evaluation",
+      "iteration": "Iteration",
+      "learning": "Learning"
+    },
+    "disclosure": {
+      "none": "None",
+      "recommended": "Recommended",
+      "required": "Required"
+    },
+    "human_responsibility": {
+      "yes": "Yes",
+      "no": "No",
+      "not_stated": "Not stated"
+    },
+    "enforcement": {
+      "none-stated": "None stated",
+      "pr-closed": "PR closed",
+      "contributor-blocked": "Contributor blocked",
+      "other": "Other"
+    }
+  },
+  "scope": {
+    "contribution_types": {
+      "code": "Code",
+      "tests": "Tests",
+      "docs-and-text": "Docs and text",
+      "issues-and-pr-descriptions": "Issues and PR descriptions",
+      "review": "Review",
+      "autonomous-agents": "Autonomous agents",
+      "contribution-types-not-defined": "Contribution types not defined"
+    },
+    "positions": {
+      "allowed": "Allowed",
+      "restricted": "Restricted",
+      "banned": "Banned",
+      "not_addressed": "Not addressed"
+    }
+  },
+  "filter_order": [
+    "stance",
+    "stated_rationale",
+    "scope",
+    "guidance_level",
+    "guidance_type",
+    "disclosure",
+    "human_responsibility",
+    "enforcement"
+  ]
+}

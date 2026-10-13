@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open research tagging — comments</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --ink: #1a1f1c;
+      --muted: #5c6560;
+      --accent: #0b6e4f;
+      --chip: #e2ebe6;
+      --chip-on: #0b6e4f;
+      --chip-on-ink: #f6f3ee;
+      --card: #fffdf9;
+      --line: #d5d0c8;
+      --sidebar: 17.5rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Source Sans 3", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, #dde8e1 0%, transparent 45%),
+        radial-gradient(ellipse at 90% 10%, #efe6d8 0%, transparent 40%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 2.5rem;
+    }
+    nav.top {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    nav.top a { color: var(--muted); text-decoration: none; }
+    nav.top a[aria-current="page"] {
+      color: var(--accent);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.1rem;
+    }
+    .page-header h1 {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+      font-weight: 600;
+      font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      color: var(--muted);
+      max-width: 40rem;
+      margin: 0 0 1rem;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .banner {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.8rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .banner strong { color: var(--ink); }
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+    .sidebar {
+      position: sticky;
+      top: 0.75rem;
+      max-height: calc(100vh - 1.5rem);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.7rem 0.85rem;
+    }
+    .sidebar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+    .sidebar-head h2 {
+      margin: 0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .clear-filters {
+      font: inherit;
+      font-size: 0.75rem;
+      background: transparent;
+      border: 1px solid var(--line);
+      padding: 0.2rem 0.45rem;
+      cursor: pointer;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .dim-filters {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    details.dim-block {
+      border: 1px solid transparent;
+      border-radius: 0;
+    }
+    details.dim-block[open] {
+      border-color: var(--line);
+      background: #faf8f4;
+      margin-bottom: 0.2rem;
+    }
+    details.dim-block.has-active > summary {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    details.dim-block summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      padding: 0.4rem 0.35rem;
+      font-size: 0.82rem;
+      color: var(--ink);
+      user-select: none;
+    }
+    details.dim-block summary::-webkit-details-marker { display: none; }
+    details.dim-block summary::before {
+      content: "▸";
+      color: var(--muted);
+      font-size: 0.7rem;
+      width: 0.75rem;
+      flex-shrink: 0;
+    }
+    details.dim-block[open] summary::before { content: "▾"; }
+    .summary-label { flex: 1; min-width: 0; }
+    .summary-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .dim-body {
+      padding: 0 0.4rem 0.55rem 1.1rem;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--chip);
+      color: var(--ink);
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+    .chip[aria-pressed="true"] {
+      background: var(--chip-on);
+      color: var(--chip-on-ink);
+      border-color: var(--chip-on);
+    }
+    .chip .count {
+      opacity: 0.7;
+      font-size: 0.75em;
+    }
+    .scope-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .scope-row label,
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    input[type="search"], select {
+      font: inherit;
+      font-size: 0.85rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--ink);
+      padding: 0.35rem 0.45rem;
+      border: 1px solid var(--line);
+      background: #fff;
+      width: 100%;
+      min-width: 0;
+    }
+    .main-pane { min-width: 0; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 0.9rem;
+      align-items: flex-end;
+      margin-bottom: 0.75rem;
+    }
+    .controls label { min-width: 8rem; flex: 1; }
+    .controls label.search { flex: 2; min-width: 12rem; }
+    .meta-row {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0 0 0.65rem;
+    }
+    table.dataTable {
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    table.dataTable thead th {
+      border-bottom: 1px solid var(--line) !important;
+    }
+    .tag {
+      display: inline-block;
+      background: var(--chip);
+      padding: 0.15rem 0.45rem;
+      margin: 0.15rem 0.2rem 0.15rem 0;
+      font-size: 0.75rem;
+      line-height: 1.3;
+      max-width: 14rem;
+    }
+    .tag .dim {
+      display: block;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .excerpt {
+      white-space: pre-wrap;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      max-width: 28rem;
+    }
+    .passage-wrap {
+      max-width: 28rem;
+      margin: 0 0 0.45rem;
+      border-left: 3px solid var(--line);
+      background: #f3f0ea;
+    }
+    .passage-wrap summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      color: var(--muted);
+      user-select: none;
+    }
+    .passage-wrap summary::-webkit-details-marker { display: none; }
+    .passage-wrap summary::before {
+      content: "▸ ";
+      color: var(--accent);
+      font-size: 0.7rem;
+    }
+    .passage-wrap[open] summary::before { content: "▾ "; }
+    .passage-wrap summary .preview {
+      display: inline;
+    }
+    .passage-wrap[open] summary .preview { display: none; }
+    .passage-wrap .passage {
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: var(--muted);
+      padding: 0 0.55rem 0.45rem;
+      margin: 0;
+    }
+    .passage-meta {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .passage-peek {
+      display: none;
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: var(--muted);
+      padding: 0 0.55rem 0.45rem;
+      margin: 0;
+      border-top: 1px dashed var(--line);
+    }
+    .passage-wrap[open] .passage-peek { display: none !important; }
+    .passage-wrap:not([open]) .passage { display: none; }
+    /* Hover peek on devices that support hover (click/tap keeps it open) */
+    @media (hover: hover) {
+      .passage-wrap:not([open]):hover .passage-peek {
+        display: block;
+      }
+    }
+    .coder-note {
+      color: var(--ink);
+    }
+    a { color: var(--accent); }
+    #commentstable_filter { display: none; }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="top" aria-label="Primary">
+      <a href="projects.html">Projects</a>
+      <a href="index.html" aria-current="page">Comments</a>
+    </nav>
+    <header class="page-header">
+      <h1>Research comment browser</h1>
+      <p class="lede">
+        PR review comments pooled across every pull request. Use the left panel
+        to filter by codebook dimension — sections stay collapsed until you open them.
+      </p>
+      <div id="fixture-banner" class="banner" hidden>
+        <strong>Sample data.</strong> Showing fixture comments until you fetch
+        live PR review comments from GitHub. Links may be placeholders.
+      </div>
+      <div id="url-filter-banner" class="banner" hidden></div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Code filters">
+        <div class="sidebar-head">
+          <h2>Code filters</h2>
+          <button type="button" class="clear-filters" id="clear-filters">Clear</button>
+        </div>
+        <div class="dim-filters" id="dim-filters"></div>
+      </aside>
+
+      <section class="main-pane">
+        <p class="meta-row" id="meta"></p>
+        <div class="controls">
+          <label class="search">Search
+            <input type="search" id="q" placeholder="text, path, author…" />
+          </label>
+          <label>Project
+            <select id="project"><option value="">All</option></select>
+          </label>
+          <label>PR
+            <select id="pr"><option value="">All</option></select>
+          </label>
+        </div>
+        <table id="commentstable" class="display" style="width:100%">
+          <thead>
+            <tr>
+              <th>Codes</th>
+              <th>Comment</th>
+              <th>Project</th>
+              <th>Path</th>
+              <th>Author</th>
+              <th>PR</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script>
+    (function () {
+      const activeByDim = {};
+      const openDims = new Set();
+      let table;
+      let allRows = [];
+      let codebook = null;
+      const urlParams = new URLSearchParams(window.location.search);
+
+      function excerpt(body) {
+        const lines = (body || "").split("\n").filter((l) => !l.trim().startsWith("#"));
+        const text = lines.join("\n").trim() || body;
+        return text.length > 280 ? text.slice(0, 277) + "…" : text;
+      }
+
+      function lineLabel(row) {
+        if (row.start_line && row.line && row.start_line !== row.line) {
+          return "L" + row.start_line + "–" + row.line;
+        }
+        if (row.line) return "L" + row.line;
+        return "";
+      }
+
+      function sourceLabel(src) {
+        if (src === "selection") return "selected lines";
+        if (src === "diff_hunk") return "diff hunk";
+        if (src === "paragraph") return "surrounding paragraph";
+        return src || "";
+      }
+
+      function truncateOneLine(text, max) {
+        const flat = (text || "").replace(/\s+/g, " ").trim();
+        if (flat.length <= max) return flat;
+        return flat.slice(0, max - 1) + "…";
+      }
+
+      function renderCommentCell(_body, _t, row) {
+        let html = "";
+        if (row.quote) {
+          const meta = [lineLabel(row), sourceLabel(row.quote_source)]
+            .filter(Boolean)
+            .join(" · ");
+          const preview = truncateOneLine(row.quote, 72);
+          const quoteEsc = $("<div>").text(row.quote).html();
+          html +=
+            '<details class="passage-wrap">' +
+            "<summary><span class=\"passage-meta\">" +
+            $("<div>").text(meta || "source text").html() +
+            "</span>" +
+            '<span class="preview"> — ' +
+            $("<div>").text(preview).html() +
+            "</span></summary>" +
+            '<div class="passage-peek" aria-hidden="true">' +
+            quoteEsc +
+            "</div>" +
+            '<div class="passage">' +
+            quoteEsc +
+            "</div></details>";
+        }
+        html +=
+          '<div class="excerpt coder-note">' +
+          $("<div>").text(excerpt(row.body)).html() +
+          "</div>";
+        return html;
+      }
+
+      function fillSelect(sel, values) {
+        const cur = sel.value;
+        sel.querySelectorAll("option:not([value=''])").forEach((o) => o.remove());
+        values.forEach((v) => {
+          const opt = document.createElement("option");
+          opt.value = String(v);
+          opt.textContent = String(v);
+          sel.appendChild(opt);
+        });
+        if ([...sel.options].some((o) => o.value === cur)) sel.value = cur;
+      }
+
+      function dimLabel(dimension) {
+        if (!codebook) return dimension;
+        for (const meta of Object.values(codebook.namespaces || {})) {
+          if (meta.dimension === dimension) return meta.label;
+        }
+        return dimension;
+      }
+
+      function countFilterKey(key) {
+        return allRows.filter((r) => (r.filter_keys || []).includes(key)).length;
+      }
+
+      function activeCount(dimension) {
+        const set = activeByDim[dimension];
+        return set ? set.size : 0;
+      }
+
+      function rememberOpenState() {
+        document.querySelectorAll("details.dim-block[data-dim]").forEach((el) => {
+          const dim = el.getAttribute("data-dim");
+          if (el.open) openDims.add(dim);
+          else openDims.delete(dim);
+        });
+      }
+
+      function renderDimensionFilters() {
+        rememberOpenState();
+        const box = document.getElementById("dim-filters");
+        box.innerHTML = "";
+        if (!codebook) return;
+
+        const order = codebook.filter_order || Object.keys(codebook.values || {});
+        order.forEach((dimension) => {
+          if (dimension === "scope") {
+            box.appendChild(renderScopeBlock());
+            return;
+          }
+          const values = codebook.values[dimension];
+          if (!values) return;
+
+          const present = Object.keys(values).filter(
+            (id) => countFilterKey(dimension + ":" + id) > 0
+          );
+          if (!present.length) return;
+
+          if (!activeByDim[dimension]) activeByDim[dimension] = new Set();
+          const nActive = activeCount(dimension);
+          const shouldOpen = openDims.has(dimension) || nActive > 0;
+
+          const details = document.createElement("details");
+          details.className = "dim-block" + (nActive ? " has-active" : "");
+          details.dataset.dim = dimension;
+          details.open = shouldOpen;
+
+          const summary = document.createElement("summary");
+          summary.innerHTML =
+            '<span class="summary-label">' +
+            dimLabel(dimension) +
+            '</span><span class="summary-meta">' +
+            (nActive ? nActive + " on" : present.length + " opts") +
+            "</span>";
+          details.appendChild(summary);
+
+          const body = document.createElement("div");
+          body.className = "dim-body";
+          const chips = document.createElement("div");
+          chips.className = "chips";
+
+          present
+            .sort((a, b) => values[a].localeCompare(values[b]))
+            .forEach((id) => {
+              const key = dimension + ":" + id;
+              const n = countFilterKey(key);
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "chip";
+              btn.innerHTML =
+                values[id] + ' <span class="count">(' + n + ")</span>";
+              btn.setAttribute(
+                "aria-pressed",
+                activeByDim[dimension].has(key) ? "true" : "false"
+              );
+              btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (activeByDim[dimension].has(key)) activeByDim[dimension].delete(key);
+                else activeByDim[dimension].add(key);
+                openDims.add(dimension);
+                renderDimensionFilters();
+                table.draw();
+              });
+              chips.appendChild(btn);
+            });
+          body.appendChild(chips);
+          details.appendChild(body);
+          box.appendChild(details);
+        });
+      }
+
+      function renderScopeBlock() {
+        if (!activeByDim.scope) activeByDim.scope = new Set();
+        const nActive = activeCount("scope");
+        const shouldOpen = openDims.has("scope") || nActive > 0;
+
+        const details = document.createElement("details");
+        details.className = "dim-block" + (nActive ? " has-active" : "");
+        details.dataset.dim = "scope";
+        details.open = shouldOpen;
+
+        const summary = document.createElement("summary");
+        summary.innerHTML =
+          '<span class="summary-label">Scope</span><span class="summary-meta">' +
+          (nActive ? "filtered" : "type + position") +
+          "</span>";
+        details.appendChild(summary);
+
+        const body = document.createElement("div");
+        body.className = "dim-body";
+        const row = document.createElement("div");
+        row.className = "scope-row";
+
+        const typeLabel = document.createElement("label");
+        typeLabel.appendChild(document.createTextNode("Contribution type"));
+        const typeSel = document.createElement("select");
+        typeSel.id = "scope-type";
+        const typeAll = document.createElement("option");
+        typeAll.value = "";
+        typeAll.textContent = "Any type";
+        typeSel.appendChild(typeAll);
+        Object.entries((codebook.scope && codebook.scope.contribution_types) || {}).forEach(
+          ([id, label]) => {
+            const appears = allRows.some((r) =>
+              (r.tags || []).some(
+                (t) => t.kind === "scope" && t.contribution_type === id
+              )
+            );
+            if (!appears) return;
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = label;
+            typeSel.appendChild(opt);
+          }
+        );
+        typeLabel.appendChild(typeSel);
+
+        const posLabel = document.createElement("label");
+        posLabel.appendChild(document.createTextNode("Position"));
+        const posSel = document.createElement("select");
+        posSel.id = "scope-position";
+        const posAll = document.createElement("option");
+        posAll.value = "";
+        posAll.textContent = "Any position";
+        posSel.appendChild(posAll);
+        Object.entries((codebook.scope && codebook.scope.positions) || {}).forEach(
+          ([id, label]) => {
+            const appears = allRows.some((r) =>
+              (r.tags || []).some((t) => t.kind === "scope" && t.position === id)
+            );
+            if (!appears) return;
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = label;
+            posSel.appendChild(opt);
+          }
+        );
+        posLabel.appendChild(posSel);
+
+        // Restore current scope selection from activeByDim
+        for (const key of activeByDim.scope) {
+          if (key.startsWith("scope-partial:")) {
+            const parts = key.split(":");
+            if (parts[1] !== "*") typeSel.value = parts[1];
+            if (parts[2] !== "*") posSel.value = parts[2];
+          } else if (key.startsWith("scope:")) {
+            const parts = key.split(":");
+            typeSel.value = parts[1] || "";
+            posSel.value = parts[2] || "";
+          }
+        }
+
+        function syncScopeFilter() {
+          activeByDim.scope.clear();
+          const t = typeSel.value;
+          const p = posSel.value;
+          if (t && p) activeByDim.scope.add("scope:" + t + ":" + p);
+          else if (t || p) activeByDim.scope.add("scope-partial:" + (t || "*") + ":" + (p || "*"));
+          openDims.add("scope");
+          details.open = true;
+          details.classList.toggle("has-active", activeByDim.scope.size > 0);
+          summary.querySelector(".summary-meta").textContent = activeByDim.scope.size
+            ? "filtered"
+            : "type + position";
+          table.draw();
+        }
+        typeSel.addEventListener("change", syncScopeFilter);
+        posSel.addEventListener("change", syncScopeFilter);
+
+        row.appendChild(typeLabel);
+        row.appendChild(posLabel);
+        body.appendChild(row);
+        details.appendChild(body);
+        return details;
+      }
+
+      function rowMatchesScope(row, key) {
+        if (key.startsWith("scope-partial:")) {
+          const parts = key.split(":");
+          const t = parts[1];
+          const p = parts[2];
+          return (row.tags || []).some((tag) => {
+            if (tag.kind !== "scope") return false;
+            if (t !== "*" && tag.contribution_type !== t) return false;
+            if (p !== "*" && tag.position !== p) return false;
+            return true;
+          });
+        }
+        return (row.filter_keys || []).includes(key);
+      }
+
+      function rowHasDimension(row, dimension) {
+        return (row.tags || []).some((t) => t.dimension === dimension);
+      }
+
+      function rowMatchesDimKey(row, dim, key) {
+        if (key === "dimension-any:" + dim) return rowHasDimension(row, dim);
+        if (dim === "scope") return rowMatchesScope(row, key);
+        return (row.filter_keys || []).includes(key);
+      }
+
+      $.fn.dataTable.ext.search.push(function (_settings, _data, dataIndex) {
+        const row = allRows[dataIndex];
+        if (!row) return true;
+        const project = document.getElementById("project").value;
+        const pr = document.getElementById("pr").value;
+        if (project && row.project !== project) return false;
+        if (pr && String(row.pr_number) !== pr) return false;
+
+        for (const [dim, keys] of Object.entries(activeByDim)) {
+          if (!keys.size) continue;
+          let ok = false;
+          for (const key of keys) {
+            if (rowMatchesDimKey(row, dim, key)) {
+              ok = true;
+              break;
+            }
+          }
+          if (!ok) return false;
+        }
+        return true;
+      });
+
+      function renderTagsCell(tags) {
+        return (tags || [])
+          .map((t) => {
+            const dim = t.dimension_label || t.dimension || "";
+            const val = t.value_label || t.display || t.raw;
+            return (
+              '<span class="tag"><span class="dim">' +
+              $("<div>").text(dim).html() +
+              "</span>" +
+              $("<div>").text(val).html() +
+              "</span>"
+            );
+          })
+          .join("");
+      }
+
+      Promise.all([
+        fetch("data/comments.json").then((r) => {
+          if (!r.ok) throw new Error("Could not load data/comments.json");
+          return r.json();
+        }),
+        fetch("data/codebook.json").then((r) => {
+          if (!r.ok) throw new Error("Could not load data/codebook.json");
+          return r.json();
+        }),
+      ])
+        .then(([payload, cb]) => {
+          codebook = cb;
+          allRows = payload.data || [];
+          const meta = payload.meta || {};
+          document.getElementById("meta").textContent =
+            allRows.length +
+            " comments" +
+            (meta.source_file ? " · from " + meta.source_file : "") +
+            (meta.codebook_version ? " · codebook " + meta.codebook_version : "");
+          if (meta.is_fixture) {
+            document.getElementById("fixture-banner").hidden = false;
+          }
+
+          const projects = [...new Set(allRows.map((r) => r.project).filter(Boolean))].sort();
+          const prs = [...new Set(allRows.map((r) => r.pr_number).filter((n) => n != null))].sort(
+            (a, b) => a - b
+          );
+          fillSelect(document.getElementById("project"), projects);
+          fillSelect(document.getElementById("pr"), prs);
+
+          // Apply deep-links from projects overview (or shared URLs)
+          applyUrlFilters();
+          renderDimensionFilters();
+
+          table = $("#commentstable").DataTable({
+            data: allRows,
+            paging: false,
+            info: true,
+            order: [[2, "asc"], [5, "asc"]],
+            columns: [
+              {
+                data: "tags",
+                render: (_d, _t, row) => renderTagsCell(row.tags),
+              },
+              {
+                data: "body",
+                render: (_d, _t, row) => renderCommentCell(_d, _t, row),
+              },
+              { data: "project", defaultContent: "" },
+              { data: "path", defaultContent: "" },
+              { data: "user", defaultContent: "" },
+              { data: "pr_number", defaultContent: "" },
+              {
+                data: "html_url",
+                render: (url) =>
+                  url ? '<a href="' + url + '" target="_blank" rel="noopener">open</a>' : "",
+              },
+            ],
+          });
+
+          const q = document.getElementById("q");
+          q.addEventListener("input", () => table.search(q.value).draw());
+          document.getElementById("project").addEventListener("change", () => table.draw());
+          document.getElementById("pr").addEventListener("change", () => table.draw());
+          document.getElementById("clear-filters").addEventListener("click", () => {
+            Object.keys(activeByDim).forEach((d) => activeByDim[d].clear());
+            openDims.clear();
+            renderDimensionFilters();
+            table.draw();
+          });
+
+          // Re-draw after URL filters set selects / activeByDim
+          table.draw();
+          showUrlFilterBanner();
+        })
+        .catch((err) => {
+          document.getElementById("meta").textContent = String(err);
+        });
+
+      function applyUrlFilters() {
+        const project = urlParams.get("project");
+        if (project) {
+          const sel = document.getElementById("project");
+          if ([...sel.options].some((o) => o.value === project)) sel.value = project;
+        }
+
+        const filter = urlParams.get("filter");
+        if (filter) {
+          // stance:permissive-with-conditions  or  scope:code:restricted
+          const parts = filter.split(":");
+          if (parts[0] === "scope" && parts.length >= 3) {
+            if (!activeByDim.scope) activeByDim.scope = new Set();
+            activeByDim.scope.add(filter);
+            openDims.add("scope");
+          } else if (parts.length >= 2) {
+            const dim = parts[0];
+            const key = filter;
+            if (!activeByDim[dim]) activeByDim[dim] = new Set();
+            activeByDim[dim].add(key);
+            openDims.add(dim);
+          }
+        }
+
+        const dimension = urlParams.get("dimension");
+        if (dimension && !filter) {
+          // Any comment tagged with this dimension (not a specific value)
+          if (!activeByDim[dimension]) activeByDim[dimension] = new Set();
+          if (dimension === "scope") {
+            activeByDim.scope.add("scope-partial:*:*");
+          } else {
+            activeByDim[dimension].add("dimension-any:" + dimension);
+          }
+          openDims.add(dimension);
+        }
+
+        const scopeType = urlParams.get("scope_type");
+        const scopePos = urlParams.get("scope_position");
+        if (scopeType || scopePos) {
+          if (!activeByDim.scope) activeByDim.scope = new Set();
+          activeByDim.scope.clear();
+          if (scopeType && scopePos) {
+            activeByDim.scope.add("scope:" + scopeType + ":" + scopePos);
+          } else {
+            activeByDim.scope.add(
+              "scope-partial:" + (scopeType || "*") + ":" + (scopePos || "*")
+            );
+          }
+          openDims.add("scope");
+        }
+      }
+
+      function showUrlFilterBanner() {
+        if (![...urlParams.keys()].length) return;
+        const bits = [];
+        if (urlParams.get("project")) bits.push("project=" + urlParams.get("project"));
+        if (urlParams.get("dimension")) bits.push("all " + urlParams.get("dimension"));
+        if (urlParams.get("filter")) bits.push(urlParams.get("filter"));
+        if (urlParams.get("scope_type") || urlParams.get("scope_position")) {
+          bits.push(
+            "scope " +
+              (urlParams.get("scope_type") || "*") +
+              " → " +
+              (urlParams.get("scope_position") || "*")
+          );
+        }
+        const el = document.getElementById("url-filter-banner");
+        el.hidden = false;
+        el.innerHTML =
+          "<strong>Filtered view.</strong> " +
+          $("<div>").text(bits.join(" · ")).html() +
+          ' · <a href="index.html">clear URL filters</a>' +
+          ' · <a href="projects.html">back to projects</a>';
+      }
+    })();
+  </script>
+</body>
+</html>

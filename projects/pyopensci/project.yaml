@@ -1,0 +1,64 @@
+# Demo project-level coding for pyOpenSci generative AI peer-review policy.
+# Passage-level tags live in PR review comments — see codebook/COMMENTING.md.
+# Codes are illustrative for the demo, not a final research judgment.
+
+slug: pyopensci
+display_name: pyOpenSci
+
+provenance:
+  source_repo: https://github.com/pyOpenSci/software-peer-review
+  source_path: our-process/generative-ai-policy.md
+  source_commit: 499a7e2bedf55f78a39ab77edcb1ed36c04ecbd7
+  source_url: https://github.com/pyOpenSci/software-peer-review/blob/499a7e2bedf55f78a39ab77edcb1ed36c04ecbd7/our-process/generative-ai-policy.md
+  retrieved_at: 2026-10-13
+  policy_location: standalone-file
+  policy_date: null
+  notes: >
+    Also copied appendices/gen-ai-checklist.md from the same commit.
+    Policy is for pyOpenSci software peer review submissions.
+
+coding:
+  stance: permissive-with-conditions
+
+  scope:
+    code: restricted
+    tests: restricted
+    docs_and_text: restricted
+    issues_and_pr_descriptions: restricted
+    review: not_addressed
+    autonomous_agents: not_addressed
+    contribution_types_not_defined: not_addressed
+
+  stated_rationale:
+    - code-quality
+    - maintainer-and-reviewer-burden
+    - social-and-ethical
+
+  guidance_on_use:
+    level: substantive-guidance
+    types:
+      - scoping
+      - design
+      - evaluation
+      - iteration
+
+  accountability:
+    human_responsibility: yes
+    disclosure: required
+    disclosure_format:
+      - free-text
+    enforcement:
+      - contributor-blocked
+      - other
+
+  context:
+    project_size: "Peer-review org for scientific Python packages; size not coded for demo"
+    governance: community
+    domain: scientific Python / peer review
+    notes: Foundation-adjacent community; policy co-developed with community input.
+
+files:
+  - path: generative-ai-policy.md
+    description: Primary generative AI / LLM policy for peer review
+  - path: gen-ai-checklist.md
+    description: Submission checklist included by the policy

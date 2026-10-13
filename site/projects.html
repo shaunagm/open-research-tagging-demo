@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projects — overall codes</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --ink: #1a1f1c;
+      --muted: #5c6560;
+      --accent: #0b6e4f;
+      --chip: #e2ebe6;
+      --chip-on: #0b6e4f;
+      --chip-on-ink: #f6f3ee;
+      --card: #fffdf9;
+      --line: #d5d0c8;
+      --pop: #1a1f1c;
+      --sidebar: 16.5rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Source Sans 3", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, #dde8e1 0%, transparent 45%),
+        radial-gradient(ellipse at 90% 10%, #efe6d8 0%, transparent 40%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 2.5rem;
+    }
+    nav.top {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    nav.top a { color: var(--muted); text-decoration: none; }
+    nav.top a[aria-current="page"] {
+      color: var(--accent);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.1rem;
+    }
+    h1 {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+      font-weight: 600;
+      font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      color: var(--muted);
+      max-width: 42rem;
+      margin: 0 0 1rem;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+    .sidebar {
+      position: sticky;
+      top: 0.75rem;
+      max-height: calc(100vh - 1.5rem);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.7rem 0.85rem;
+    }
+    .sidebar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+    .sidebar-head h2 {
+      margin: 0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .clear-filters {
+      font: inherit;
+      font-size: 0.75rem;
+      background: transparent;
+      border: 1px solid var(--line);
+      padding: 0.2rem 0.45rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .dim-filters {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    details.dim-block[open] {
+      border: 1px solid var(--line);
+      background: #faf8f4;
+      margin-bottom: 0.2rem;
+    }
+    details.dim-block.has-active > summary {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    details.dim-block summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      padding: 0.4rem 0.35rem;
+      font-size: 0.82rem;
+      user-select: none;
+    }
+    details.dim-block summary::-webkit-details-marker { display: none; }
+    details.dim-block summary::before {
+      content: "▸";
+      color: var(--muted);
+      font-size: 0.7rem;
+      width: 0.75rem;
+    }
+    details.dim-block[open] summary::before { content: "▾"; }
+    .summary-label { flex: 1; }
+    .summary-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .dim-body { padding: 0 0.4rem 0.55rem 1.1rem; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--chip);
+      color: var(--ink);
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+    .chip[aria-pressed="true"] {
+      background: var(--chip-on);
+      color: var(--chip-on-ink);
+      border-color: var(--chip-on);
+    }
+    .chip .count {
+      opacity: 0.7;
+      font-size: 0.75em;
+    }
+    .main-pane { min-width: 0; }
+    .meta-row { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      flex: 1;
+      min-width: 12rem;
+    }
+    .controls input[type="search"] {
+      font: inherit;
+      font-size: 0.85rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--ink);
+      padding: 0.35rem 0.45rem;
+      border: 1px solid var(--line);
+      background: var(--card);
+    }
+    table.dataTable {
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    table.dataTable thead th {
+      border-bottom: 1px solid var(--line) !important;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    .project-name {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .project-name a { color: var(--ink); text-decoration: none; }
+    .project-name a:hover { color: var(--accent); }
+    .sub {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+    .code-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .code-pill {
+      position: relative;
+      display: inline-block;
+      background: var(--chip);
+      border: 1px solid transparent;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.78rem;
+      cursor: default;
+      max-width: 14rem;
+      line-height: 1.25;
+    }
+    .code-pill:hover,
+    .code-pill:focus-within {
+      border-color: var(--accent);
+      z-index: 5;
+    }
+    .code-pill .pop {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 4px);
+      min-width: 12rem;
+      background: var(--pop);
+      color: #f6f3ee;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.78rem;
+      z-index: 20;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+    .code-pill:hover .pop,
+    .code-pill:focus-within .pop {
+      display: block;
+    }
+    .pop a {
+      display: block;
+      color: #c8e6d8;
+      text-decoration: none;
+      padding: 0.2rem 0;
+    }
+    .pop a:hover { color: #fff; }
+    .pop .hint {
+      color: #9aa39d;
+      font-size: 0.7rem;
+      margin-bottom: 0.25rem;
+    }
+    .empty { color: var(--muted); font-size: 0.8rem; }
+    a { color: var(--accent); }
+    #projectstable_filter { display: none; }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="top" aria-label="Primary">
+      <a href="projects.html" aria-current="page">Projects</a>
+      <a href="index.html">Comments</a>
+    </nav>
+    <h1>Project overview</h1>
+    <p class="lede">
+      Overall codes from each <code>project.yaml</code>. Filter by stance and
+      other dimensions on the left. Hover a code for evidence links into the
+      comment browser.
+    </p>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Project code filters">
+        <div class="sidebar-head">
+          <h2>Filter projects</h2>
+          <button type="button" class="clear-filters" id="clear-filters">Clear</button>
+        </div>
+        <div class="dim-filters" id="dim-filters"></div>
+      </aside>
+
+      <section class="main-pane">
+        <p class="meta-row" id="meta"></p>
+        <div class="controls">
+          <label>Search
+            <input type="search" id="q" placeholder="name, domain, governance…" />
+          </label>
+        </div>
+        <table id="projectstable" class="display" style="width:100%">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Stance</th>
+              <th>Scope</th>
+              <th>Rationale</th>
+              <th>Guidance</th>
+              <th>Accountability</th>
+              <th>Comments</th>
+            </tr>
+          </thead>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script>
+    (function () {
+      const activeByDim = {};
+      const openDims = new Set();
+      let table;
+      let allRows = [];
+      let codebook = null;
+
+      // Dimensions we can filter on the projects table (from overall.*)
+      const FILTER_DIMS = [
+        { key: "stance", label: "Stance" },
+        { key: "stated_rationale", label: "Stated rationale" },
+        { key: "scope", label: "Scope", idField: "id" },
+        { key: "guidance_level", label: "Guidance level" },
+        { key: "guidance_type", label: "Guidance type" },
+        { key: "disclosure", label: "Disclosure" },
+        { key: "human_responsibility", label: "Human responsibility" },
+        { key: "enforcement", label: "Enforcement" },
+      ];
+
+      function projectHasCode(row, dim, valueId) {
+        const group = row.overall && row.overall[dim];
+        const values = (group && group.values) || [];
+        return values.some((v) => v.id === valueId);
+      }
+
+      function codesPresent(dim) {
+        const counts = {};
+        allRows.forEach((row) => {
+          const values = (row.overall && row.overall[dim] && row.overall[dim].values) || [];
+          values.forEach((v) => {
+            counts[v.id] = counts[v.id] || { label: v.label || v.id, count: 0 };
+            counts[v.id].count += 1;
+          });
+        });
+        return counts;
+      }
+
+      function dimLabel(key) {
+        const hit = FILTER_DIMS.find((d) => d.key === key);
+        if (hit) return hit.label;
+        if (!codebook) return key;
+        for (const meta of Object.values(codebook.namespaces || {})) {
+          if (meta.dimension === key) return meta.label;
+        }
+        return key;
+      }
+
+      function rememberOpenState() {
+        document.querySelectorAll("details.dim-block[data-dim]").forEach((el) => {
+          const dim = el.getAttribute("data-dim");
+          if (el.open) openDims.add(dim);
+          else openDims.delete(dim);
+        });
+      }
+
+      function renderDimensionFilters() {
+        rememberOpenState();
+        const box = document.getElementById("dim-filters");
+        box.innerHTML = "";
+
+        FILTER_DIMS.forEach(({ key }) => {
+          const present = codesPresent(key);
+          const ids = Object.keys(present);
+          if (!ids.length) return;
+
+          if (!activeByDim[key]) activeByDim[key] = new Set();
+          const nActive = activeByDim[key].size;
+          const shouldOpen = openDims.has(key) || nActive > 0;
+
+          const details = document.createElement("details");
+          details.className = "dim-block" + (nActive ? " has-active" : "");
+          details.dataset.dim = key;
+          details.open = shouldOpen;
+
+          const summary = document.createElement("summary");
+          summary.innerHTML =
+            '<span class="summary-label">' +
+            dimLabel(key) +
+            '</span><span class="summary-meta">' +
+            (nActive ? nActive + " on" : ids.length + " opts") +
+            "</span>";
+          details.appendChild(summary);
+
+          const body = document.createElement("div");
+          body.className = "dim-body";
+          const chips = document.createElement("div");
+          chips.className = "chips";
+
+          ids
+            .sort((a, b) => present[a].label.localeCompare(present[b].label))
+            .forEach((id) => {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "chip";
+              btn.innerHTML =
+                present[id].label +
+                ' <span class="count">(' +
+                present[id].count +
+                ")</span>";
+              btn.setAttribute(
+                "aria-pressed",
+                activeByDim[key].has(id) ? "true" : "false"
+              );
+              btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (activeByDim[key].has(id)) activeByDim[key].delete(id);
+                else activeByDim[key].add(id);
+                openDims.add(key);
+                renderDimensionFilters();
+                table.draw();
+                updateMeta();
+              });
+              chips.appendChild(btn);
+            });
+          body.appendChild(chips);
+          details.appendChild(body);
+          box.appendChild(details);
+        });
+      }
+
+      function updateMeta() {
+        const visible = table ? table.rows({ search: "applied" }).count() : allRows.length;
+        document.getElementById("meta").textContent =
+          visible + " of " + allRows.length + " projects shown";
+      }
+
+      function pill(valueObj) {
+        const links = valueObj.links || {};
+        const all = links.all || {};
+        const match = links.matching || {};
+        const label = valueObj.label || valueObj.id;
+        let pop =
+          '<div class="pop" role="tooltip">' +
+          '<div class="hint">Evidence in comments</div>';
+        if (all.href) {
+          pop +=
+            '<a href="' +
+            all.href +
+            '">All ' +
+            (links.dimension_label || "dimension").toLowerCase() +
+            " (" +
+            (all.count || 0) +
+            ")</a>";
+        }
+        if (match.href) {
+          pop +=
+            '<a href="' +
+            match.href +
+            '">Matching: ' +
+            $("<div>").text(match.label || label).html() +
+            " (" +
+            (match.count || 0) +
+            ")</a>";
+        }
+        pop += "</div>";
+        return (
+          '<span class="code-pill" tabindex="0">' +
+          $("<div>").text(label).html() +
+          pop +
+          "</span>"
+        );
+      }
+
+      function cellFromValues(group) {
+        const values = (group && group.values) || [];
+        if (!values.length) return '<span class="empty">—</span>';
+        return (
+          '<div class="code-stack">' +
+          values.map(pill).join("") +
+          "</div>"
+        );
+      }
+
+      function guidanceCell(row) {
+        const parts = [];
+        const level = row.overall && row.overall.guidance_level;
+        const types = row.overall && row.overall.guidance_type;
+        if (level) parts.push(cellFromValues(level));
+        if (types) parts.push(cellFromValues(types));
+        return parts.length ? parts.join("") : '<span class="empty">—</span>';
+      }
+
+      function accountabilityCell(row) {
+        const o = row.overall || {};
+        const parts = [];
+        ["disclosure", "human_responsibility", "enforcement"].forEach((k) => {
+          if (o[k]) parts.push(cellFromValues(o[k]));
+        });
+        return parts.length ? parts.join("") : '<span class="empty">—</span>';
+      }
+
+      $.fn.dataTable.ext.search.push(function (_settings, _data, dataIndex) {
+        const row = allRows[dataIndex];
+        if (!row) return true;
+        for (const [dim, ids] of Object.entries(activeByDim)) {
+          if (!ids.size) continue;
+          // OR within a dimension: project has any of the selected values
+          let ok = false;
+          for (const id of ids) {
+            if (projectHasCode(row, dim, id)) {
+              ok = true;
+              break;
+            }
+          }
+          if (!ok) return false;
+        }
+        return true;
+      });
+
+      Promise.all([
+        fetch("data/projects.json").then((r) => {
+          if (!r.ok) throw new Error("Could not load data/projects.json — run scripts/process_projects.py");
+          return r.json();
+        }),
+        fetch("data/codebook.json").then((r) => (r.ok ? r.json() : {})),
+      ])
+        .then(([payload, cb]) => {
+          codebook = cb;
+          allRows = payload.data || [];
+
+          renderDimensionFilters();
+
+          table = $("#projectstable").DataTable({
+            data: allRows,
+            paging: false,
+            order: [[0, "asc"]],
+            columns: [
+              {
+                data: "display_name",
+                render: (_d, _t, row) => {
+                  const gov = (row.context && row.context.governance) || "";
+                  const domain = (row.context && row.context.domain) || "";
+                  const sub = [gov, domain].filter(Boolean).join(" · ");
+                  return (
+                    '<div class="project-name"><a href="' +
+                    (row.comments_href || "index.html?project=" + row.slug) +
+                    '">' +
+                    $("<div>").text(row.display_name).html() +
+                    "</a>" +
+                    (sub ? '<span class="sub">' + $("<div>").text(sub).html() + "</span>" : "") +
+                    "</div>"
+                  );
+                },
+              },
+              {
+                data: "overall.stance",
+                defaultContent: "",
+                render: (_d, _t, row) =>
+                  cellFromValues(row.overall && row.overall.stance),
+              },
+              {
+                data: "overall.scope",
+                defaultContent: "",
+                render: (_d, _t, row) =>
+                  cellFromValues(row.overall && row.overall.scope),
+              },
+              {
+                data: "overall.stated_rationale",
+                defaultContent: "",
+                render: (_d, _t, row) =>
+                  cellFromValues(row.overall && row.overall.stated_rationale),
+              },
+              {
+                data: null,
+                render: (_d, _t, row) => guidanceCell(row),
+              },
+              {
+                data: null,
+                render: (_d, _t, row) => accountabilityCell(row),
+              },
+              {
+                data: "comment_count",
+                render: (n, _t, row) =>
+                  '<a href="' +
+                  (row.comments_href || "#") +
+                  '">' +
+                  (n || 0) +
+                  "</a>",
+              },
+            ],
+          });
+
+          updateMeta();
+          const q = document.getElementById("q");
+          q.addEventListener("input", () => {
+            table.search(q.value).draw();
+            updateMeta();
+          });
+          document.getElementById("clear-filters").addEventListener("click", () => {
+            Object.keys(activeByDim).forEach((d) => activeByDim[d].clear());
+            openDims.clear();
+            renderDimensionFilters();
+            table.draw();
+            updateMeta();
+          });
+        })
+        .catch((err) => {
+          document.getElementById("meta").textContent = String(err);
+        });
+    })();
+  </script>
+</body>
+</html>

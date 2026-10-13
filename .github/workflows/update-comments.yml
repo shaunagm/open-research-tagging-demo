@@ -1,0 +1,44 @@
+# Optional automation: fetch PR review comments and refresh the static site data.
+# Enable after the repo is on GitHub. Does not deploy Pages by itself.
+
+name: Update comment data
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 14 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch PR review comments
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/fetch_pr_comments.py
+
+      - name: Process comments
+        run: python scripts/process_comments.py
+
+      - name: Process projects
+        run: |
+          pip install -r requirements.txt
+          python scripts/process_projects.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/raw_comments.json site/data/comments.json site/data/projects.json
+          git diff --staged --quiet || git commit -m "chore: refresh PR review comment data"
+          git push

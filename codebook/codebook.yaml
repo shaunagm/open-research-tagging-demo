@@ -1,0 +1,181 @@
+# Draft codebook for coding open-source AI contribution policies.
+# Not final — for demo use. Adapted from Leah's draft; Stance adapted from RedMonk.
+
+version: draft-0.1
+status: draft
+
+dimensions:
+
+  stance:
+    select: single
+    description: >
+      The policy's overall position on AI-generated contributions.
+    values:
+      - id: ban
+        label: Ban
+        description: AI-generated contributions prohibited
+      - id: discouraged
+        label: Discouraged
+        description: Allowed but advised against, with no enforceable limit
+      - id: gate-restrict
+        label: Gate/restrict
+        description: Allowed only under limits (PR gating, pre-approval, issue-first, etc.)
+      - id: permissive-with-conditions
+        label: Permissive with conditions
+        description: Allowed, with stated requirements
+      - id: permissive
+        label: Permissive
+        description: Allowed, no stated requirements
+      - id: no-policy
+        label: No policy
+        description: No written policy found after the search protocol
+
+  scope:
+    select: multi
+    description: >
+      For each contribution type, code the position:
+      allowed, restricted, banned, or not_addressed.
+    contribution_types:
+      - id: code
+        label: Code
+      - id: tests
+        label: Tests
+      - id: docs-and-text
+        label: Docs and text
+      - id: issues-and-pr-descriptions
+        label: Issues and PR descriptions
+      - id: review
+        label: Review
+      - id: autonomous-agents
+        label: Autonomous agents
+      - id: contribution-types-not-defined
+        label: Contribution types not defined
+    positions:
+      - allowed
+      - restricted
+      - banned
+      - not_addressed
+
+  stated_rationale:
+    select: multi
+    description: >
+      Only code rationales the policy states (not inferred).
+    values:
+      - id: code-quality
+        label: Code quality
+      - id: maintainer-and-reviewer-burden
+        label: Maintainer and reviewer burden
+      - id: security
+        label: Security
+      - id: licensing-and-copyright
+        label: Licensing and copyright
+      - id: environmental
+        label: Environmental
+      - id: social-and-ethical
+        label: Social and ethical (trust, transparency, community norms)
+      - id: contributor-learning-and-skill-development
+        label: Contributor learning and skill development
+      - id: other
+        label: Other (specify in free text)
+
+  guidance_on_use:
+    level:
+      select: single
+      description: Does the policy only restrict, or does it guide how to use AI well?
+      values:
+        - id: restricts-only
+          label: Restricts only
+        - id: some-guidance
+          label: Some guidance
+        - id: substantive-guidance
+          label: Substantive guidance
+    types:
+      select: multi
+      description: Type of guidance offered (when present).
+      values:
+        - id: scoping
+          label: Scoping (PR size limits, scoped tasks, issue-first)
+        - id: design
+          label: Design (modularity, existing patterns, technical debt)
+        - id: evaluation
+          label: Evaluation (understand, test, and explain output)
+        - id: iteration
+          label: Iteration (human-AI cycles rather than one-shot)
+        - id: learning
+          label: Learning (supports building skills or understanding)
+
+  accountability:
+    human_responsibility:
+      select: single
+      values:
+        - id: yes
+          label: Yes — contributor is responsible for submitted work
+        - id: no
+          label: No
+        - id: not_stated
+          label: Not stated
+    disclosure:
+      select: single
+      values:
+        - id: none
+          label: None
+        - id: recommended
+          label: Recommended
+        - id: required
+          label: Required
+    disclosure_format:
+      select: multi
+      values:
+        - id: label-or-tag
+          label: Label or tag
+        - id: free-text
+          label: Free text
+        - id: other
+          label: Other
+    enforcement:
+      select: multi
+      values:
+        - id: none-stated
+          label: None stated
+        - id: pr-closed
+          label: PR closed
+        - id: contributor-blocked
+          label: Contributor blocked
+        - id: other
+          label: Other
+
+  context:
+    description: >
+      Project-level context. Define size measures and thresholds in notes as needed.
+    fields:
+      - id: project_size
+        label: Project size (contributors, dependents, or downloads — note measure)
+      - id: governance
+        label: Governance
+        values:
+          - solo
+          - community
+          - foundation-backed
+          - corporate-backed
+      - id: domain
+        label: Domain (e.g. scientific Python, core Python, plus subdomain)
+      - id: policy_date
+        label: Policy date and revision history
+      - id: policy_location
+        label: Policy location
+        values:
+          - CONTRIBUTING
+          - standalone-file
+          - governance-doc
+          - other
+
+# Tag conventions for PR review comments (see COMMENTING.md)
+comment_tags:
+  stance: "#stance/<value-id>"
+  scope: "#scope/<contribution-type>:<position>"
+  rationale: "#rationale/<value-id>"
+  guidance_level: "#guidance-level/<value-id>"
+  guidance: "#guidance/<type-id>"
+  disclosure: "#disclosure/<value-id>"
+  human_responsibility: "#human-responsibility/<value-id>"
+  enforcement: "#enforcement/<value-id>"
