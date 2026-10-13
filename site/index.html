@@ -324,6 +324,21 @@
       border-left: 3px solid #c48a2a;
       max-width: 28rem;
     }
+    .parse-warn a { color: #8a5a10; font-weight: 600; }
+    .tag-warn-badge {
+      display: inline-block;
+      background: #f8ebd2;
+      color: #7a4b00;
+      border: 1px solid #c48a2a;
+      padding: 0.15rem 0.45rem;
+      font-size: 0.75rem;
+      margin: 0.1rem 0.15rem 0.1rem 0;
+    }
+    .review-filter {
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--line);
+    }
     .help-link {
       font-size: 0.85rem;
       margin: 0 0 1rem;
@@ -372,6 +387,11 @@
           <h2>Code filters</h2>
           <button type="button" class="clear-filters" id="clear-filters">Clear</button>
         </div>
+        <div class="review-filter">
+          <button type="button" class="chip" id="filter-tag-review" aria-pressed="false">
+            Needs tag review
+          </button>
+        </div>
         <div class="dim-filters" id="dim-filters"></div>
       </aside>
 
@@ -411,6 +431,7 @@
     (function () {
       const activeByDim = {};
       const openDims = new Set();
+      let onlyTagReview = false;
       let table;
       let allRows = [];
       let codebook = null;
@@ -472,7 +493,14 @@
           "</div>";
         (row.parse_warnings || []).forEach((w) => {
           html +=
-            '<div class="parse-warn">' + $("<div>").text(w).html() + "</div>";
+            '<div class="parse-warn">' + $("<div>").text(w).html();
+          if (row.html_url) {
+            html +=
+              ' <a href="' +
+              row.html_url +
+              '" target="_blank" rel="noopener">Edit on GitHub</a>';
+          }
+          html += "</div>";
         });
         return html;
       }
@@ -724,6 +752,7 @@
         const pr = document.getElementById("pr").value;
         if (project && row.project !== project) return false;
         if (pr && String(row.pr_number) !== pr) return false;
+        if (onlyTagReview && !row.needs_tag_review) return false;
 
         for (const [dim, keys] of Object.entries(activeByDim)) {
           if (!keys.size) continue;
@@ -739,8 +768,9 @@
         return true;
       });
 
-      function renderTagsCell(tags) {
-        return (tags || [])
+      function renderTagsCell(_tags, _t, row) {
+        const tags = row.tags || [];
+        let html = tags
           .map((t) => {
             const dim = t.dimension_label || t.dimension || "";
             const val = t.value_label || t.display || t.raw;
@@ -753,6 +783,16 @@
             );
           })
           .join("");
+        if (row.needs_tag_review) {
+          const n = (row.parse_warnings || []).length;
+          html +=
+            '<span class="tag-warn-badge">Needs tag review' +
+            (n ? " (" + n + ")" : "") +
+            "</span>";
+        } else if (!tags.length) {
+          html += '<span class="empty">—</span>';
+        }
+        return html;
       }
 
       Promise.all([
@@ -769,13 +809,22 @@
           codebook = cb;
           allRows = payload.data || [];
           const meta = payload.meta || {};
+          const reviewN = allRows.filter((r) => r.needs_tag_review).length;
           document.getElementById("meta").textContent =
             allRows.length +
             " comments" +
+            (reviewN ? " · " + reviewN + " need tag review" : "") +
             (meta.source_file ? " · from " + meta.source_file : "") +
             (meta.codebook_version ? " · codebook " + meta.codebook_version : "");
           if (meta.is_fixture) {
             document.getElementById("fixture-banner").hidden = false;
+          }
+          const reviewBtn = document.getElementById("filter-tag-review");
+          if (reviewN) {
+            reviewBtn.innerHTML =
+              'Needs tag review <span class="count">(' + reviewN + ")</span>";
+          } else {
+            reviewBtn.hidden = true;
           }
 
           const projects = [...new Set(allRows.map((r) => r.project).filter(Boolean))].sort();
@@ -797,7 +846,7 @@
             columns: [
               {
                 data: "tags",
-                render: (_d, _t, row) => renderTagsCell(row.tags),
+                render: (_d, _t, row) => renderTagsCell(_d, _t, row),
               },
               {
                 data: "body",
@@ -819,9 +868,21 @@
           q.addEventListener("input", () => table.search(q.value).draw());
           document.getElementById("project").addEventListener("change", () => table.draw());
           document.getElementById("pr").addEventListener("change", () => table.draw());
+          document.getElementById("filter-tag-review").addEventListener("click", () => {
+            onlyTagReview = !onlyTagReview;
+            document
+              .getElementById("filter-tag-review")
+              .setAttribute("aria-pressed", onlyTagReview ? "true" : "false");
+            table.draw();
+          });
+
           document.getElementById("clear-filters").addEventListener("click", () => {
             Object.keys(activeByDim).forEach((d) => activeByDim[d].clear());
             openDims.clear();
+            onlyTagReview = false;
+            document
+              .getElementById("filter-tag-review")
+              .setAttribute("aria-pressed", "false");
             renderDimensionFilters();
             table.draw();
           });
@@ -835,6 +896,12 @@
         });
 
       function applyUrlFilters() {
+        if (urlParams.get("needs_tag_review") === "1") {
+          onlyTagReview = true;
+          const btn = document.getElementById("filter-tag-review");
+          if (btn) btn.setAttribute("aria-pressed", "true");
+        }
+
         const project = urlParams.get("project");
         if (project) {
           const sel = document.getElementById("project");

@@ -307,6 +307,7 @@ def normalize(comment: dict, codebook: dict) -> dict:
         "displays": [t["display"] for t in tags],
         "filter_keys": [t["filter_key"] for t in tags],
         "parse_warnings": warnings,
+        "needs_tag_review": bool(warnings),
         "codes": codes_by_dimension(tags),
         "path": path,
         "project": project_from_path(path),
