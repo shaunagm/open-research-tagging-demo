@@ -1,7 +1,7 @@
 {
   "meta": {
     "source_file": "site/data/raw_comments.json",
-    "count": 3,
+    "count": 5,
     "is_fixture": false,
     "codebook_version": "draft-0.1"
   },
@@ -108,6 +108,82 @@
       "commit_id": "5a7df07d0c108fbf7c6c651d306bca4c5ba13e1f",
       "created_at": "2026-10-13T18:17:54Z",
       "updated_at": "2026-10-13T18:17:54Z"
+    },
+    {
+      "id": 4262452080,
+      "body": "#Burden:spam",
+      "quote": "* We prefer that all communication in our software review issues are written by a human. We embrace the use of LLMs for translation and grammar correction. We prefer honest interactions over ones that prioritize perfect language and grammar. Use as little aid from an LLM as possible.\n* We will block accounts that spam our repositories or burden our volunteers with repeated, automated comments that aren't directly related to and in support of productive conversations in a review.",
+      "quote_source": "paragraph",
+      "diff_hunk": "",
+      "tags": [
+        {
+          "raw": "#burden:spam",
+          "namespace": "burden",
+          "value": "spam",
+          "dimension": "burden",
+          "dimension_label": "Burden",
+          "kind": "value",
+          "value_label": "Spam",
+          "display": "Burden: Spam",
+          "filter_key": "burden:spam"
+        }
+      ],
+      "tag_strings": [
+        "#burden:spam"
+      ],
+      "displays": [
+        "Burden: Spam"
+      ],
+      "filter_keys": [
+        "burden:spam"
+      ],
+      "parse_warnings": [],
+      "needs_tag_review": false,
+      "codes": {
+        "burden": [
+          {
+            "value": "spam",
+            "filter_key": "burden:spam",
+            "display": "Burden: Spam"
+          }
+        ]
+      },
+      "path": "projects/pyopensci/generative-ai-policy.md",
+      "project": "pyopensci",
+      "start_line": 38,
+      "line": 38,
+      "side": "RIGHT",
+      "user": "shaunagm",
+      "pr_number": 2,
+      "html_url": "https://github.com/shaunagm/open-research-tagging-demo/pull/2#discussion_r4262452080",
+      "commit_id": "5a7df07d0c108fbf7c6c651d306bca4c5ba13e1f",
+      "created_at": "2026-10-13T18:25:50Z",
+      "updated_at": "2026-10-13T18:25:50Z"
+    },
+    {
+      "id": 4262453757,
+      "body": "(testing out whether the syntax checker works!)",
+      "quote": "* We prefer that all communication in our software review issues are written by a human. We embrace the use of LLMs for translation and grammar correction. We prefer honest interactions over ones that prioritize perfect language and grammar. Use as little aid from an LLM as possible.\n* We will block accounts that spam our repositories or burden our volunteers with repeated, automated comments that aren't directly related to and in support of productive conversations in a review.",
+      "quote_source": "paragraph",
+      "diff_hunk": "",
+      "tags": [],
+      "tag_strings": [],
+      "displays": [],
+      "filter_keys": [],
+      "parse_warnings": [],
+      "needs_tag_review": false,
+      "codes": {},
+      "path": "projects/pyopensci/generative-ai-policy.md",
+      "project": "pyopensci",
+      "start_line": 38,
+      "line": 38,
+      "side": "RIGHT",
+      "user": "shaunagm",
+      "pr_number": 2,
+      "html_url": "https://github.com/shaunagm/open-research-tagging-demo/pull/2#discussion_r4262453757",
+      "commit_id": "5a7df07d0c108fbf7c6c651d306bca4c5ba13e1f",
+      "created_at": "2026-10-13T18:26:00Z",
+      "updated_at": "2026-10-13T18:26:01Z"
     }
   ]
 }
