@@ -62,5 +62,3 @@ files:
     description: Primary generative AI / LLM policy for peer review
   - path: gen-ai-checklist.md
     description: Submission checklist included by the policy
-
-
